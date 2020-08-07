@@ -1,5 +1,6 @@
 from DataCollector.DataCollector import DataCollector
 from DataCleanser.DataCleanser import DataCleanser
+from DataCleanser.Scaler import Scaler
 
 
 if __name__ == '__main__':
@@ -12,7 +13,10 @@ if __name__ == '__main__':
     df = dataCleanser.remove_str_col(df)
     df = dataCleanser.remove_cate_col(df, threshold=2)
 
-    print(dataCleanser.na_col_list)
-    print(dataCleanser.str_col_list)
-    print(dataCleanser.cate_col_list)
-    print(df.columns)
+    x_cols = [x for x in df.columns if x != y_col]
+    scaler = Scaler(y_col=y_col, x_cols=x_cols, scaler_method='MinMax')
+    scaler.fit_scaler(df)
+    df = scaler.transform_df(df)
+
+    print(df)
+
