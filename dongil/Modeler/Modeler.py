@@ -17,9 +17,9 @@ class Modeler:
             if mdl_name == 'logistic':
                 clf = LogisticRegression(class_weight='balanced', solver='lbfgs')
             elif mdl_name == 'random_forest':
-                clf = RandomForestClassifier(n_estimators=100, n_jobs=4, class_weight='balanced')
+                clf = RandomForestClassifier(n_estimators=100, n_jobs=-1, class_weight='balanced')
             else:
-                clf = xgb.XGBClassifier(n_jobs=4, object='binary:logistic')
+                clf = xgb.XGBClassifier(n_jobs=-1, object='binary:logistic')
 
             self.mdl_inst_list.append(clf)
 
