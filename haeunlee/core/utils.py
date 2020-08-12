@@ -12,13 +12,13 @@ class ExperimentSettings(object):
     def __init__(self):
         pass
 
-    def read_data(self,data_path,label,label_path=None):
-        if os.path.splitext(data_path)[1] == '.tsv':
-            sep = '\t'
-        if os.path.splitext(data_path)[1] == '.csv':
-            sep = ','
+    def read_data(self, data_path, label, label_path=None):
+        if os.path.splitext(data_path)[1] == ".tsv":
+            sep = "\t"
+        if os.path.splitext(data_path)[1] == ".csv":
+            sep = ","
         print("reading dataset..")
-        data = pd.read_csv(data_path, sep=sep,header=None)
+        data = pd.read_csv(data_path, sep=sep, header=None)
         data.columns += 1
 
         if label in data.columns:
@@ -30,15 +30,18 @@ class ExperimentSettings(object):
             self.inputs = data
             self.targets = pd.read_csv(label_path, sep=sep, header=None)
 
-        self.categorical_cols = [ col for col in self.inputs.columns if self.inputs[col].dtype == 'object']
-        self.numerical_cols = [ col for col in self.inputs.columns if self.inputs[col].dtype == int or float]
+        self.categorical_cols = [
+            col for col in self.inputs.columns if self.inputs[col].dtype == "object"
+        ]
+        self.numerical_cols = [
+            col for col in self.inputs.columns if self.inputs[col].dtype == int or float
+        ]
         self.ignore_cols = None
 
-    def set_ignore(self,ignore_cols=None):
+    def set_ignore(self, ignore_cols=None):
 
         if type(list) == list:
             raise NotImplementedError
-
 
         for col in ignore_cols:
             if col in self.categorical_cols:
@@ -47,13 +50,6 @@ class ExperimentSettings(object):
                 self.numerical_cols.remove(col)
 
         self.ignore_cols = ignore_cols
-
-
-
-
-
-
-
 
 
 #         self.exp_dir = pjoin("./Project_Template", str(datetime.now()).strip())

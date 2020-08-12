@@ -20,6 +20,7 @@ from sklearn.impute import SimpleImputer
 from sklearn.compose import ColumnTransformer
 from sklearn.base import TransformerMixin, BaseEstimator
 
+
 class PipelineCreator:
     def __init__(self):
         """
@@ -31,16 +32,19 @@ class PipelineCreator:
         """
         pass
 
-class NumPipelineCreator():
 
+class NumPipelineCreator:
     def __init__(self):
         # basic numerical pipeline
         self.steps = [
-            ("impute_nan_num",SimpleImputer(
-                    missing_values=np.nan, strategy="median", add_indicator=True)
-             ),
-            ("standardscaler", StandardScaler())
-            ]
+            (
+                "impute_nan_num",
+                SimpleImputer(
+                    missing_values=np.nan, strategy="median", add_indicator=True
+                ),
+            ),
+            ("standardscaler", StandardScaler()),
+        ]
 
     def add_transform(self, steps):
         self.steps.append((steps))
@@ -50,6 +54,7 @@ class NumPipelineCreator():
     def get_pipeline(self):
         numeric_transformer = Pipeline(steps=self.steps)
         return numeric_transformer
+
 
 class CatPipelineCreator:
     def get_pipeline(self):
@@ -64,4 +69,3 @@ class CatPipelineCreator:
             ]
         )
         return categorical_transformer
-

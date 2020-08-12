@@ -4,6 +4,7 @@ from haeunlee.core.transforms import NumPipelineCreator, CatPipelineCreator
 from sklearn.compose import ColumnTransformer
 from haeunlee.core.trainer import ModelTrainer
 from haeunlee.models.support_vector_machine import SVM
+
 #
 def main(args):
     xp = ExperimentSettings()
@@ -18,9 +19,12 @@ def main(args):
 
         cat_transform = CatPipelineCreator()
         preprocessor = ColumnTransformer(
-            [('num_transform', num_transform.get_pipeline(), xp.numerical_cols),
-             ('cat_transform', cat_transform.get_pipeline(),  xp.categorical_cols)],
-            remainder='drop')
+            [
+                ("num_transform", num_transform.get_pipeline(), xp.numerical_cols),
+                ("cat_transform", cat_transform.get_pipeline(), xp.categorical_cols),
+            ],
+            remainder="drop",
+        )
 
         # TODO: ModelTrainer
         train = ModelTrainer(
@@ -29,7 +33,7 @@ def main(args):
             model=SVM(),
             pipeline_save=True,
             model_save=True,
-            cv=5  # works split is FALSE
+            cv=5,  # works split is FALSE
         )
         train.run_all()
 
@@ -48,7 +52,9 @@ if __name__ == "__main__":
     # modify
     parser = argparse.ArgumentParser()
     parser.add_argument("--train_flag", "-t", type=bool, default=True)
-    parser.add_argument("--train", type=str, default="./data/lezhin_dataset_v2_training.tsv")
+    parser.add_argument(
+        "--train", type=str, default="./data/lezhin_dataset_v2_training.tsv"
+    )
     parser.add_argument("--test", type=str, default="./data/lezhin_dataset_v2_test.tsv")
     parser.add_argument("--target", default=1)
     parser.add_argument("--predict", type=str, default="pred.csv")

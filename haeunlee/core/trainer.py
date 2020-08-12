@@ -28,9 +28,7 @@ class ModelTrainer(object):
         model, tun_par = self.model.train_settings
 
         # TODO: make directory for model save
-        clf = Pipeline(
-            steps=[("full_pipeline", self.preprocessor), ("model", model)]
-        )
+        clf = Pipeline(steps=[("full_pipeline", self.preprocessor), ("model", model)])
         opt = GridSearchCV(clf, tun_par, n_jobs=-1, cv=self.cv)
         opt.fit(self.xp.inputs, self.xp.targets)
 
@@ -48,7 +46,11 @@ class ModelTrainer(object):
 
         if self.model_save:
             print("model save to.. ", self.result_path)
-            joblib.dump(opt.best_estimator_, self.result_path + "/model_checkpoint.joblib")
+            joblib.dump(
+                opt.best_estimator_, self.result_path + "/model_checkpoint.joblib"
+            )
+
+
 #
 # class ModelTester(object):
 #     def __init__(self, data_path, target, model_path):
@@ -66,6 +68,3 @@ class ModelTrainer(object):
 #
 #         y_pred = trained_model.predict(x_data)
 #         write_report(y_pred,y_data,save_path=self.report_path)
-
-
-
