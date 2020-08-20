@@ -10,6 +10,8 @@ from sklearn.preprocessing import StandardScaler, MinMaxScaler, RobustScaler
 from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import cross_val_score, StratifiedKFold
 
 
 if __name__ == '__main__':
@@ -41,10 +43,16 @@ if __name__ == '__main__':
     pipe = Pipeline(
         steps=[('column_trans', column_trans),
                ('data_cleanser', dataCleanser),
-               ('scaler', StandardScaler())]
+               ('scaler', StandardScaler()),
+               ('random_foest', RandomForestClassifier(n_estimators=100, n_jobs=-1, class_weight='balanced'))],
+        verbose=True
     )
 
-    result = pipe.fit_transform(X=df[x_col_list], y=df[y_col])
+    cv = StratifiedKFold(n_splits=5)
+    scores = cross_val_score(pipe, df[x_col_list], df[y_col], cv=cv, scoring='roc_auc')
+    print(scores.mean())
+
+    # result = pipe.fit_transform(X=df[x_col_list], y=df[y_col])
 
     # dataVisualizer = DataVisualizer(y_col=y_col, save_path='../img')
     # for x_col in range(152, 168):

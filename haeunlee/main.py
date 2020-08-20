@@ -19,7 +19,6 @@ def main(args):
             cv=5,  # works split is FALSE
         )
         train.run_all()
-    cd
     else:
         model_path = "Project_Template/2020-07-14 17:15:24.779617/2_result/model_checkpoint.joblib"
         test = ModelTester(
