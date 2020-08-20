@@ -1,41 +1,28 @@
 import argparse
-from haeunlee.core.utils import ExperimentSettings
-from haeunlee.core.transforms import NumPipelineCreator, CatPipelineCreator
-from sklearn.compose import ColumnTransformer
+from haeunlee.core.source import ExperimentSettings
+from haeunlee.core.transforms import PipelineCreator
 from haeunlee.core.trainer import ModelTrainer
-from haeunlee.models.support_vector_machine import SVM
 
-#
 def main(args):
-    xp = ExperimentSettings()
     if args.train_flag:
-
-        xp.read_data(args.train, args.target)
-        print(xp.numerical_cols, xp.categorical_cols, xp.ignore_cols)
+        xp = ExperimentSettings(args.train, args.target)
+        xp.read_data()
+        xp.set_ignore([i for i in range(152,168)])
 
         # TODO: Define Namedtuple (name, transformer, columns)
-        num_transform = NumPipelineCreator()
-        # TODO: Add clip transform
-
-        cat_transform = CatPipelineCreator()
-        preprocessor = ColumnTransformer(
-            [
-                ("num_transform", num_transform.get_pipeline(), xp.numerical_cols),
-                ("cat_transform", cat_transform.get_pipeline(), xp.categorical_cols),
-            ],
-            remainder="drop",
-        )
+        pipeline = PipelineCreator(xp.numeric_cols, xp.cat_cols, xp.ignore)
 
         # TODO: ModelTrainer
         train = ModelTrainer(
             xp=xp,
-            preprocessor=preprocessor,
-            model=SVM(),
+            preprocessor=pipeline.get_pipeline(),
             pipeline_save=True,
             model_save=True,
-            cv=5,  # works split is FALSE
+            cv=3,  # works split is FALSE
         )
-        train.run_all()
+        train.run_all_rf()
+        train.run_all_ridge()
+        train.run_all_xgboost()
 
     # TODO: ModelTester
     # else:
@@ -55,8 +42,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "--train", type=str, default="./data/lezhin_dataset_v2_training.tsv"
     )
-    parser.add_argument("--test", type=str, default="./data/lezhin_dataset_v2_test.tsv")
-    parser.add_argument("--target", default=1)
+    parser.add_argument("--test", type=str, default="./data/lezhin_dataset_v2_training.tsv")
+    parser.add_argument("--target", type = str, default='1')
     parser.add_argument("--predict", type=str, default="pred.csv")
     parser.add_argument("--report", type=str, default="report.csv")
     args = parser.parse_args()

@@ -1,28 +1,29 @@
-# import os
-# import sys
-# sys.path.append(os.path.realpath('.'))
-# from main import *
-import pandas as pd
-import os
-import shutil
-import matplotlib.pyplot as plt
-from sklearn.model_selection import train_test_split
-import pandas as pd
 import numpy as np
 from sklearn.preprocessing import (
-    OrdinalEncoder,
     StandardScaler,
     OneHotEncoder,
-    FunctionTransformer,
 )
+from sklearn.preprocessing import RobustScaler
 from sklearn.pipeline import Pipeline
 from sklearn.impute import SimpleImputer
 from sklearn.compose import ColumnTransformer
-from sklearn.base import TransformerMixin, BaseEstimator
 
+num_steps = [(
+                "impute_nan_num",
+                SimpleImputer(
+                    missing_values=np.nan, strategy="constant", fill_value= 0, add_indicator=True
+                ),
+            ),
+            ("standardscaler", StandardScaler())]
+cat_steps=[(
+                    "impute_nan_cat",
+                    SimpleImputer(strategy="constant", fill_value=np.nan),
+                ),
+                ("onehotencoder", OneHotEncoder()),
+            ]
 
 class PipelineCreator:
-    def __init__(self):
+    def __init__(self,numeric_cols,category_cols,ignore):
         """
         { 
            imputation: nan/unknown -> 같은 데이터로 처리, another category
@@ -30,42 +31,38 @@ class PipelineCreator:
            onehotencoder:
         }
         """
+        self.num_steps = num_steps
+        self.cat_steps = cat_steps
+        self.numeric_cols = numeric_cols
+        self.category_cols = category_cols
+
+    def write_steps(self):
         pass
 
-
-class NumPipelineCreator:
-    def __init__(self):
-        # basic numerical pipeline
-        self.steps = [
-            (
-                "impute_nan_num",
-                SimpleImputer(
-                    missing_values=np.nan, strategy="median", add_indicator=True
-                ),
-            ),
-            ("standardscaler", StandardScaler()),
-        ]
-
-    def add_transform(self, steps):
-        self.steps.append((steps))
-        for step in steps:
-            print(step)
-
     def get_pipeline(self):
-        numeric_transformer = Pipeline(steps=self.steps)
-        return numeric_transformer
+        final_steps = []
+
+        print(f"Pipeline numerical({len(self.numeric_cols)}): {self.numeric_cols}")
+        print(f"Pipeline category({len(self.category_cols)}): {self.category_cols}")
+
+        if self.numeric_cols:
+            final_steps.append(("numerical transformation", Pipeline(self.num_steps), self.numeric_cols))
+        if self.category_cols:
+            final_steps.append(("categorical transformation", Pipeline(self.cat_steps), self.category_cols))
+
+        pipe = ColumnTransformer(
+            final_steps,
+            remainder='drop',
+            verbose=True)
+
+        return pipe
+
+    def add_num_steps(self,**step):
+        for item, value in step:
+            print(item, value)
+
+    def add_cat_steps(self,**step):
+        for item, value in step:
+            print(item, value)
 
 
-class CatPipelineCreator:
-    def get_pipeline(self):
-        # basic numerical pipeline
-        categorical_transformer = Pipeline(
-            steps=[
-                (
-                    "impute_nan_cat",
-                    SimpleImputer(strategy="constant", fill_value="unknown"),
-                ),
-                ("onehotencoder", OneHotEncoder()),
-            ]
-        )
-        return categorical_transformer
