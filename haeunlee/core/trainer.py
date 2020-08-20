@@ -5,10 +5,9 @@ import time
 from sklearn.linear_model import Ridge
 from xgboost import XGBClassifier
 
+
 class ModelTrainer(object):
-    def __init__(
-        self, xp, preprocessor,  pipeline_save=True, model_save=True, cv=5
-    ):
+    def __init__(self, xp, preprocessor, pipeline_save=True, model_save=True, cv=5):
         self.xp = xp
         self.preprocessor = preprocessor
         self.pipeline_save = pipeline_save
@@ -27,12 +26,10 @@ class ModelTrainer(object):
         #                 'classifier__n_estimators': [200, 500, 700],
         #                 'classifier__max_features': ['auto', 'sqrt']
         #             }
-        clf  = RandomForestClassifier(n_jobs=-1,max_features= 'sqrt' ,\
-                              n_estimators=50, oob_score = True)
-        param_grid = {
-                        'n_estimators': [200, 500, 700],
-                        'max_features': ['auto', 'sqrt']
-                    }
+        clf = RandomForestClassifier(
+            n_jobs=-1, max_features="sqrt", n_estimators=50, oob_score=True
+        )
+        param_grid = {"n_estimators": [200, 500, 700], "max_features": ["auto", "sqrt"]}
         CV_rfc = GridSearchCV(estimator=clf, param_grid=param_grid, cv=5)
         CV_rfc.fit(transform_X, self.xp.y)
 
@@ -42,10 +39,9 @@ class ModelTrainer(object):
     def run_all_ridge(self):
         transform_X = self.preprocessor.fit_transform(self.xp.X)
 
-        pipe = Pipeline([("preprocessing", self.preprocessor),
-                         ("classifier", Ridge())])
+        pipe = Pipeline([("preprocessing", self.preprocessor), ("classifier", Ridge())])
         param_grid = {
-            'classifier__alpha': [0.001, 0.01, 0.1, 1, 10, 100, 1000],
+            "classifier__alpha": [0.001, 0.01, 0.1, 1, 10, 100, 1000],
         }
         CV_ridge = GridSearchCV(estimator=pipe, param_grid=param_grid, cv=3)
         CV_ridge.fit(self.xp.X, self.xp.y)
@@ -55,16 +51,26 @@ class ModelTrainer(object):
 
     def run_all_xgboost(self):
 
-        pipe = Pipeline([("preprocessing", self.preprocessor),
-                         ("classifier", XGBClassifier(learning_rate=0.02, n_estimators=600, \
-                                                      objective='binary:logistic'))])
+        pipe = Pipeline(
+            [
+                ("preprocessing", self.preprocessor),
+                (
+                    "classifier",
+                    XGBClassifier(
+                        learning_rate=0.02,
+                        n_estimators=600,
+                        objective="binary:logistic",
+                    ),
+                ),
+            ]
+        )
 
         param_grid = {
-            'classifier__min_child_weight': [1, 5, 10],
-            'classifier__gamma': [0.5, 1, 1.5, 2, 5],
-            'classifier__subsample': [0.6, 0.8, 1.0],
-            'classifier__colsample_bytree': [0.6, 0.8, 1.0],
-            'classifier__max_depth': [3, 4, 5]
+            "classifier__min_child_weight": [1, 5, 10],
+            "classifier__gamma": [0.5, 1, 1.5, 2, 5],
+            "classifier__subsample": [0.6, 0.8, 1.0],
+            "classifier__colsample_bytree": [0.6, 0.8, 1.0],
+            "classifier__max_depth": [3, 4, 5],
         }
         CV_xgb = GridSearchCV(estimator=pipe, param_grid=param_grid, cv=3)
         CV_xgb.fit(self.xp.X, self.xp.y)
@@ -74,14 +80,15 @@ class ModelTrainer(object):
 
     # TODO
     def run_all_dask(self):
-        param_grid = {"C": [0.001],
-                      "kernel": ['rbf', 'poly', 'sigmoid']}
+        param_grid = {"C": [0.001], "kernel": ["rbf", "poly", "sigmoid"]}
 
-        grid_search = GridSearchCV(SVC(gamma='auto', random_state=0, probability=True),
-                                   param_grid=param_grid,
-                                   iid=True,
-                                   cv=3,
-                                   n_jobs=-1)
+        grid_search = GridSearchCV(
+            SVC(gamma="auto", random_state=0, probability=True),
+            param_grid=param_grid,
+            iid=True,
+            cv=3,
+            n_jobs=-1,
+        )
 
         grid_search.fit(transform_X[:10000], self.xp.y[:10000])
 
@@ -106,8 +113,9 @@ class ModelTrainer(object):
                 opt.best_estimator_, self.result_path + "/model_checkpoint.joblib"
             )
 
+
 # TODO
-'''
+"""
 class ModelTester(object):
     def __init__(self, data_path, target, model_path):
         self.data_path = data_path
@@ -124,4 +132,4 @@ class ModelTester(object):
 
         y_pred = trained_model.predict(x_data)
         write_report(y_pred,y_data,save_path=self.report_path)
-'''
+"""

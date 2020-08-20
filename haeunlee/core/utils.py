@@ -8,18 +8,22 @@ import pandas as pd
 
 from sklearn.model_selection import train_test_split
 
-def drop_nan_row(df ,target_col):
+
+def drop_nan_row(df, target_col):
     return df.dropna(subset=[target_col])
 
-def drop_nan_col(df,threshold=0.8):
+
+def drop_nan_col(df, threshold=0.8):
     return
 
-def split_X_y(df,target_col):
+
+def split_X_y(df, target_col):
     # input = df.drop(target_col, axis=1)
     # target = df[target_col]
     return df.drop(target_col, axis=1), df[target_col]
 
-def classify_cols(df,drop_ratio = 0.7,unique_value=100,show=False):
+
+def classify_cols(df, drop_ratio=0.7, unique_value=100, show=False):
     category, numerical, ignore = [], [], []
     length = len(df.index)
 
@@ -42,6 +46,5 @@ def classify_cols(df,drop_ratio = 0.7,unique_value=100,show=False):
         print(f"numerical({len(numerical)}): {numerical}")
         print(f"category({len(category)}): {category}")
         print(f"ignore({len(ignore)}): {ignore}")
-
 
     return numerical, category, ignore

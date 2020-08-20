@@ -3,11 +3,12 @@ from haeunlee.core.source import ExperimentSettings
 from haeunlee.core.transforms import PipelineCreator
 from haeunlee.core.trainer import ModelTrainer
 
+
 def main(args):
     if args.train_flag:
         xp = ExperimentSettings(args.train, args.target)
         xp.read_data()
-        xp.set_ignore([i for i in range(152,168)])
+        xp.set_ignore([i for i in range(152, 168)])
 
         # TODO: Define Namedtuple (name, transformer, columns)
         pipeline = PipelineCreator(xp.numeric_cols, xp.cat_cols, xp.ignore)
@@ -42,8 +43,10 @@ if __name__ == "__main__":
     parser.add_argument(
         "--train", type=str, default="./data/lezhin_dataset_v2_training.tsv"
     )
-    parser.add_argument("--test", type=str, default="./data/lezhin_dataset_v2_training.tsv")
-    parser.add_argument("--target", type = str, default='1')
+    parser.add_argument(
+        "--test", type=str, default="./data/lezhin_dataset_v2_training.tsv"
+    )
+    parser.add_argument("--target", type=str, default="1")
     parser.add_argument("--predict", type=str, default="pred.csv")
     parser.add_argument("--report", type=str, default="report.csv")
     args = parser.parse_args()
