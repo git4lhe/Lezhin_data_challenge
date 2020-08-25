@@ -1,10 +1,6 @@
 from DataCollector.DataCollector import DataCollector
 from DataCleanser.DataCleanser import DataCleanser
 from FeatureController.PurchaseRatioMaker import PurchaseRatioMaker
-from DataCleanser.Scaler import Scaler
-from Modeler.Modeler import Modeler
-from DataVisualizer.DataVisualizer import DataVisualizer
-from FeatureController.FeatureController import FeatureController
 
 from sklearn.preprocessing import StandardScaler, MinMaxScaler, RobustScaler
 from sklearn.pipeline import Pipeline
@@ -79,5 +75,5 @@ if __name__ == '__main__':
     # modeler = Modeler(y_col=y_col, x_cols=x_cols, mdl_name_list=mdl_name_list)
     # result = modeler.cross_validation(df)
 
-    print(result)
+    # print(result)
 

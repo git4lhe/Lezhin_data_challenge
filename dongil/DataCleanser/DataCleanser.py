@@ -1,5 +1,6 @@
 import warnings
 import pandas as pd
+import numpy as np
 from sklearn.base import BaseEstimator
 
 
@@ -20,7 +21,7 @@ class DataCleanser(BaseEstimator):
     def _make_str_col_list(self, df):
         for col in df.columns:
             try:
-                df[col] = pd.to_numeric(df[col])
+                df[col].astype('float64')
             except ValueError:
                 self.str_col_list.append(col)
 
@@ -36,9 +37,7 @@ class DataCleanser(BaseEstimator):
         self.drop_col_list = list(set(self.na_col_list + self.str_col_list + self.cate_col_list))
 
     def transform(self, X):
-        df = pd.DataFrame(X)
-        remain_cols = [x for x in df.columns if x not in self.drop_col_list]
-        return df[remain_cols].to_numpy()
+        return np.delete(X, self.drop_col_list, axis=1)
 
     def fit_transform(self, X, y=None):
         self.fit(X=X, y=y)
