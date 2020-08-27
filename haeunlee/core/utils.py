@@ -9,12 +9,23 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 
 
-def drop_nan_row(df, target_col):
+def drop_y_nan_row(df, target_col):
     return df.dropna(subset=[target_col])
 
 
 def drop_nan_col(df, threshold=0.8):
     return
+
+
+def make_dir(path, previous=False):
+    """
+    previous: delete all previous files
+    """
+    if not os.path.exists(path):
+        os.makedirs(path)
+    else:
+        shutil.rmtree(path)
+        os.makedirs(path)
 
 
 def split_X_y(df, target_col):

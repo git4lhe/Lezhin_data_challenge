@@ -62,7 +62,6 @@ class PipelineCreator:
                     self.category_cols,
                 )
             )
-
         pipe = ColumnTransformer(final_steps, remainder="drop", verbose=True)
 
         return pipe

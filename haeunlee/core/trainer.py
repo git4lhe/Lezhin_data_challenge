@@ -1,19 +1,108 @@
 from sklearn.model_selection import GridSearchCV
 from sklearn.pipeline import Pipeline
-from sklearn.ensemble import RandomForestClassifier
 import time
-from sklearn.linear_model import Ridge
-from xgboost import XGBClassifier
+import pandas as pd
+from haeunlee.core.utils import make_dir
+from sklearn.linear_model import Lasso
+from dask.distributed import Client, progress
+from sklearn.svm import SVC
+import joblib
+import time
+from time import gmtime, strftime
+from sklearn.ensemble import RandomForestClassifier
+import dask_ml.model_selection as dcv
+
+client = Client(processes=False, threads_per_worker=8, n_workers=1, memory_limit="16GB")
+
+class ParameterGrid():
+
+    @property
+    def random_forest(self):
+        n_estimators = [100, 300, 500, 800, 1200]
+        # max_depth = [5, 8, 15, 25, 30]
+        # min_samples_split = [2, 5, 10, 15, 100]
+        # min_samples_leaf = [1, 2, 5, 10]
+
+        param_grid = dict(
+            n_estimators=n_estimators)
+            # max_depth=max_depth,
+            # min_samples_split=min_samples_split,
+            # min_samples_leaf=min_samples_leaf,
+        # )
+        return param_grid
+
+    @property
+    def svm(self):
+        C =[0.001, 0.01]
+        kernel = ["sigmoid"]
+
+        param_grid = dict(
+            C=C,
+            kernel = kernel)
+
+        return param_grid
+
+    @property
+    def lasso(self):
+        param_grid = {'alpha': [0.02, 0.024]} #, 0.025, 0.026, 0.03]}
+
+        return param_grid
 
 
 class ModelTrainer(object):
-    def __init__(self, xp, preprocessor, pipeline_save=True, model_save=True, cv=5):
+    def __init__(self, xp, xt, preprocessor, pipeline_save=True, model_save=True, cv=5):
         self.xp = xp
+        self.X_t = xt
         self.preprocessor = preprocessor
         self.pipeline_save = pipeline_save
         self.model_save = model_save
         self.cv = cv
         self.result_path = time.ctime()
+        self.param_grid = ParameterGrid()
+
+    def dump(self,grid_search, model):
+        '''
+        The training time is written in the file
+        '''
+        results = pd.DataFrame(grid_search.cv_results_).head()
+
+        make_dir(f"haeunlee/result/{model}")
+        results.to_csv(f"haeunlee/result/{model}/{strftime('%Y-%m-%d %H:%M:%S', gmtime())}.csv")
+
+    def run_dask_rf(self):
+        model = "random_forest"
+
+        clf = RandomForestClassifier()
+        grid_search = GridSearchCV(
+            estimator=clf, param_grid=self.param_grid.random_forest, cv=self.cv, verbose=1
+        )
+
+        with joblib.parallel_backend("dask"):
+            progress(grid_search.fit(self.X_t, self.xp.y))
+
+        self.dump(grid_search,model=model)
+
+    def run_dask_lasso(self):
+        model = 'lasso'
+        grid_search = GridSearchCV(
+            Lasso(), param_grid=self.param_grid.lasso, cv=self.cv
+        )
+        with joblib.parallel_backend("dask"):
+            progress(grid_search.fit(self.X_t, self.xp.y))
+
+        self.dump(grid_search, model=model)
+
+    def run_dask_svc(self):
+        model = 'svm'
+        grid_search = GridSearchCV(
+            SVC(gamma="auto", random_state=0, probability=True),
+            param_grid=self.param_grid.svm, cv = self.cv
+        )
+
+        with joblib.parallel_backend("dask"):
+            progress(grid_search.fit(self.X_t, self.xp.y))
+
+        self.dump(grid_search,model=model)
 
     def run_all_rf(self):
         # TODO: make directory for model save
