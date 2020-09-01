@@ -1,5 +1,11 @@
 # Data analysis case study
 
+## FYI
+- takes too much time for Support Vector Machine as classifier,
+  - instead SVM, recommend random forest
+- StandardScaler(), RobustScaler() -> is there much difference?
+- Dask for big data, but failed to use 
+
 ## Dataset
 - Regine comics data challenge 2017
 <https://tech.lezhin.com/events/data-challenge-pyconkr-2017>

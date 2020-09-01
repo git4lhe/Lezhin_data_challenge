@@ -1,13 +1,8 @@
 import unittest
-from core.models import ModelTrainer
-import pandas as pd
-import os
-import argparse
-from main import main
 
 
 class TestSummary(unittest.TestCase):
-    def test_model_trainer(self):
+    def test_numerical_(self):
         data_path = "test/titanic/titanic_train.csv"
 
         parser = argparse.ArgumentParser()
