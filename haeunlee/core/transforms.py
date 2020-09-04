@@ -3,11 +3,14 @@ from sklearn.preprocessing import (
     StandardScaler,
     OneHotEncoder,
 )
-from sklearn.preprocessing import RobustScaler
+from sklearn.feature_extraction.text import HashingVectorizer
 from sklearn.pipeline import Pipeline
 from sklearn.impute import SimpleImputer
 from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import FunctionTransformer
 
+join = FunctionTransformer(' '.join, validate=True)
+TOKENS_ALPHANUMERIC = '[A-Za-z0-9]+(?=\\s+)'
 num_steps = [
     (
         "impute_nan_num",
@@ -17,14 +20,21 @@ num_steps = [
     ),
     ("standardscaler", StandardScaler()),
 ]
+
 cat_steps = [
-    ("impute_nan_cat", SimpleImputer(strategy="constant", fill_value=np.nan),),
-    ("onehotencoder", OneHotEncoder()),
+    (
+        "impute_nan_cat",
+        SimpleImputer(
+            missing_values=np.nan, strategy='constant', fill_value='ABCD1234', add_indicator=True
+        ),
+    ),
+    # ("join", join),
+    ("HashingVectorizer", HashingVectorizer(n_features=2 ** 5, binary = False, lowercase=False)),
 ]
 
 
 class PipelineCreator:
-    def __init__(self, numeric_cols, category_cols, ignore):
+    def __init__(self, numeric_cols, str_cols, ignore = None):
         """
         { 
            imputation: nan/unknown -> 같은 데이터로 처리, another category
@@ -35,41 +45,23 @@ class PipelineCreator:
         self.num_steps = num_steps
         self.cat_steps = cat_steps
         self.numeric_cols = numeric_cols
-        self.category_cols = category_cols
-
-    def write_steps(self):
-        pass
+        self.str_cols = str_cols
+        self.final_pipe = []
 
     def get_pipeline(self):
-        final_steps = []
 
         print(f"Pipeline numerical({len(self.numeric_cols)}): {self.numeric_cols}")
-        print(f"Pipeline category({len(self.category_cols)}): {self.category_cols}")
+        print(f"Pipeline string({len(self.str_cols)}): {self.str_cols}")
 
-        if self.numeric_cols:
-            final_steps.append(
-                (
-                    "numerical transformation",
-                    Pipeline(self.num_steps),
-                    self.numeric_cols,
-                )
-            )
-        if self.category_cols:
-            final_steps.append(
-                (
-                    "categorical transformation",
-                    Pipeline(self.cat_steps),
-                    self.category_cols,
-                )
-            )
-        pipe = ColumnTransformer(final_steps, remainder="drop", verbose=True)
+        self.final_pipe.append(
+            ("numerical", Pipeline(self.num_steps), self.numeric_cols)
+        )
+        self.final_pipe.append(
+            ("string column transformation", Pipeline(self.cat_steps), self.str_cols)
+        )
+        pipe = ColumnTransformer(self.final_pipe, remainder="drop", verbose=True)
 
         return pipe
 
-    def add_num_steps(self, **step):
-        for item, value in step:
-            print(item, value)
-
-    def add_cat_steps(self, **step):
-        for item, value in step:
-            print(item, value)
+    def add_pipeline(self, **step):
+        print(step)

@@ -34,7 +34,7 @@ def split_X_y(df, target_col):
     return df.drop(target_col, axis=1), df[target_col]
 
 
-def classify_cols(df, drop_ratio=0.7, unique_value=100, show=False):
+def classify_cols(df, drop_ratio=0.5, unique_value=10000, show=False):
     category, numerical, ignore = [], [], []
     length = len(df.index)
 

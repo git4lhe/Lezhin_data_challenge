@@ -3,27 +3,24 @@ from haeunlee.core.source import ExperimentSettings
 from haeunlee.core.transforms import PipelineCreator
 from haeunlee.core.trainer import ModelTrainer
 from sklearn import linear_model
+from sklearn.feature_extraction.text import HashingVectorizer
 
 def main(args):
     if args.train_flag:
         xp = ExperimentSettings(args.test, args.target)
-        xp.read_data()
-        xp.set_ignore([str(i) for i in range(152, 168)])
-        print(xp.numeric_cols, xp.cat_cols, xp.target_col, type(xp.target_col))
+        xp.read_data(ignore = ['10'])
 
         # TODO: Define Namedtuple (name, transformer, columns)
-        pipeline = PipelineCreator(xp.numeric_cols, xp.cat_cols, xp.ignore)
-        X_t = pipeline.get_pipeline().fit_transform(xp.X)
+        pipeline = PipelineCreator(xp.numeric_cols, xp.str_cols, xp.ignore_cols).get_pipeline()
 
         # TODO: ModelTrainer
         trainer = ModelTrainer(
-            xp=xp,
-            xt=X_t,
-            preprocessor=pipeline.get_pipeline(),
+            preprocessor=pipeline,
             pipeline_save=True,
             model_save=True,
             cv=2,  # works split is FALSE
         )
+        trainer.run_rf(xp.X, xp.y)
 
 if __name__ == "__main__":
 
